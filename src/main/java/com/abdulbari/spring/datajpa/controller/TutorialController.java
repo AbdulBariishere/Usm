@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bezkoder.spring.datajpa.model.Tutorial;
 import com.bezkoder.spring.datajpa.repository.TutorialRepository;
 
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
 public class TutorialController {
@@ -29,15 +29,15 @@ public class TutorialController {
 	@Autowired
 	TutorialRepository tutorialRepository;
 
-	@GetMapping("/tutorials")
-	public ResponseEntity<List<Tutorial>> getAllTutorials(@RequestParam(required = false) String title) {
+	@GetMapping("/userdata")
+	public ResponseEntity<List<Tutorial>> getAllTutorials(@RequestParam(required = false) String name) {
 		try {
 			List<Tutorial> tutorials = new ArrayList<Tutorial>();
 
-			if (title == null)
+			if (name == null)
 				tutorialRepository.findAll().forEach(tutorials::add);
 			else
-				tutorialRepository.findByTitleContaining(title).forEach(tutorials::add);
+				tutorialRepository.findBynameContaining(name).forEach(tutorials::add);
 
 			if (tutorials.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -49,7 +49,7 @@ public class TutorialController {
 		}
 	}
 
-	@GetMapping("/tutorials/{id}")
+	@GetMapping("/userdata/{id}")
 	public ResponseEntity<Tutorial> getTutorialById(@PathVariable("id") long id) {
 		Optional<Tutorial> tutorialData = tutorialRepository.findById(id);
 
@@ -60,33 +60,33 @@ public class TutorialController {
 		}
 	}
 
-	@PostMapping("/tutorials")
+	@PostMapping("/userdata")
 	public ResponseEntity<Tutorial> createTutorial(@RequestBody Tutorial tutorial) {
 		try {
 			Tutorial _tutorial = tutorialRepository
-					.save(new Tutorial(tutorial.getTitle(), tutorial.getDescription(), false));
+					.save(new Tutorial(tutorial.getname(), tutorial.getDescription(),  tutorial.getDesignation()));
 			return new ResponseEntity<>(_tutorial, HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
 		}
 	}
 
-	@PutMapping("/tutorials/{id}")
+	@PutMapping("/userdata/{id}")
 	public ResponseEntity<Tutorial> updateTutorial(@PathVariable("id") long id, @RequestBody Tutorial tutorial) {
 		Optional<Tutorial> tutorialData = tutorialRepository.findById(id);
 
 		if (tutorialData.isPresent()) {
 			Tutorial _tutorial = tutorialData.get();
-			_tutorial.setTitle(tutorial.getTitle());
+			_tutorial.setname(tutorial.getname());
 			_tutorial.setDescription(tutorial.getDescription());
-			_tutorial.setPublished(tutorial.isPublished());
+			_tutorial.setdesignation(tutorial.getDesignation());
 			return new ResponseEntity<>(tutorialRepository.save(_tutorial), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
-	@DeleteMapping("/tutorials/{id}")
+	@DeleteMapping("/userdata/{id}")
 	public ResponseEntity<HttpStatus> deleteTutorial(@PathVariable("id") long id) {
 		try {
 			tutorialRepository.deleteById(id);
@@ -96,7 +96,7 @@ public class TutorialController {
 		}
 	}
 
-	@DeleteMapping("/tutorials")
+	@DeleteMapping("/userdata")
 	public ResponseEntity<HttpStatus> deleteAllTutorials() {
 		try {
 			tutorialRepository.deleteAll();
@@ -107,18 +107,18 @@ public class TutorialController {
 
 	}
 
-	@GetMapping("/tutorials/published")
-	public ResponseEntity<List<Tutorial>> findByPublished() {
-		try {
-			List<Tutorial> tutorials = tutorialRepository.findByPublished(true);
-
-			if (tutorials.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			}
-			return new ResponseEntity<>(tutorials, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
-		}
-	}
+//	@GetMapping("/tutorials/designation")
+//	public ResponseEntity<List<Tutorial>> findBydesignation() {
+//		try {
+//			List<Tutorial> tutorials = tutorialRepository.findBydesignation(true);
+//
+//			if (tutorials.isEmpty()) {
+//				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//			}
+//			return new ResponseEntity<>(tutorials, HttpStatus.OK);
+//		} catch (Exception e) {
+//			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+//		}
+//	}
 
 }
